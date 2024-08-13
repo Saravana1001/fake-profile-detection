@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake Profile Detector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function calculateEdgeValues() {
+            const minFollowers = {{ min_followers }};
+            const maxFollowers = {{ max_followers }};
+            const minFollowing = {{ min_following }};
+            const maxFollowing = {{ max_following }};
+            
+            const followers = document.getElementById('followers').value;
+            const following = document.getElementById('following').value;
+            
+            const edgeFollowedBy = (followers - minFollowers) / (maxFollowers - minFollowers);
+            const edgeFollow = (following - minFollowing) / (maxFollowing - minFollowing);
+
+            // Display the calculated values in the respective fields
+            document.getElementById('edge_followed_by').value = isFinite(edgeFollowedBy) ? edgeFollowedBy.toFixed(3) : '';
+            document.getElementById('edge_follow').value = isFinite(edgeFollow) ? edgeFollow.toFixed(3) : '';
+        }
+
+
+        window.onload = function() {
+            if (document.getElementById('result')) {
+                document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+            }
+        };
+
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Fake Profile Detector</h1>
+        <form method="post" onsubmit="scrollToResult()">
+            <!-- Input fields for raw follower and following counts -->
+            <label for="followers">Number of Followers:</label>
+            <input type="number" id="followers" name="followers" min="0" required oninput="calculateEdgeValues()"><br>
+
+            <label for="following">Number of Following:</label>
+            <input type="number" id="following" name="following" min="0" required oninput="calculateEdgeValues()"><br>
+
+            <!-- Auto-updating fields for calculated edge_followed_by and edge_follow -->
+            <label for="edge_followed_by">Edge Followed By:</label>
+            <input type="number" id="edge_followed_by" name="edge_followed_by" step="0.001" readonly><br>
+
+            <label for="edge_follow">Edge Follow:</label>
+            <input type="number" id="edge_follow" name="edge_follow" step="0.001" readonly><br>
+
+            <!-- Other existing fields -->
+            <label for="username_length">Username Length:</label>
+            <input type="number" id="username_length" name="username_length" min="1" max="30" required><br>
+
+            <label for="username_has_number">Username Has Number (0 or 1):</label>
+            <input type="number" id="username_has_number" name="username_has_number" min="0" max="1" required><br>
+
+            <label for="full_name_has_number">Full Name Has Number (0 or 1):</label>
+            <input type="number" id="full_name_has_number" name="full_name_has_number" min="0" max="1" required><br>
+
+            <label for="full_name_length">Full Name Length:</label>
+            <input type="number" id="full_name_length" name="full_name_length" min="1" max="50" required><br>
+
+            <label for="is_private">Is Private (0 or 1):</label>
+            <input type="number" id="is_private" name="is_private" min="0" max="1" required><br>
+
+            <label for="is_joined_recently">Is Joined Recently (0 or 1):</label>
+            <input type="number" id="is_joined_recently" name="is_joined_recently" min="0" max="1" required><br>
+
+            <label for="has_channel">Has Channel (0 or 1):</label>
+            <input type="number" id="has_channel" name="has_channel" min="0" max="1" required><br>
+
+            <label for="is_business_account">Is Business Account (0 or 1):</label>
+            <input type="number" id="is_business_account" name="is_business_account" min="0" max="1" required><br>
+
+            <label for="has_guides">Has Guides (0 or 1):</label>
+            <input type="number" id="has_guides" name="has_guides" min="0" max="1" required><br>
+
+            <label for="has_external_url">Has External URL (0 or 1):</label>
+            <input type="number" id="has_external_url" name="has_external_url" min="0" max="1" required><br>
+
+            <input type="submit" value="Predict" onclick="scrollToResult()">
+        </form>
+
+        {% if prediction is not none %}
+        <div id="result">
+            <h2>Prediction: {{ 'Fake' if prediction == 1 else 'Real' }}</h2>
+            <p>Probability of being fake: {{ proba[1] }}</p>
+        </div>
+        {% endif %}
+
+    </div>
+</body>
+</html>
